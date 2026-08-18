@@ -1,5 +1,13 @@
 # Changelog
 
+## [v5.0.0] - Digital Voice & Native Android App
+- **Added:** Codec2 Digital Voice compression allowing up to 30 seconds of highly compressed voice to be transmitted over LoRa.
+- **Added:** Native Android Application with distinct tabs for Voice, Text, and Images. Includes background polling, auto-tab switching on incoming data, and toast notifications.
+- **Added:** Forced Dark Theme throughout the Android App to reduce eye strain.
+- **Fixed (ESP32):** Addressed a severe bug where if a receiver successfully got a Voice or Image transfer and sent an ACK, but the transmitter's LoRa module missed the ACK due to RF noise or timing, the transmitter would retry sending the `END` packet for 2.5 minutes. The receiver was previously ignoring these retries because it was already in `IDLE` mode, causing the transmitter to completely lock up and reject all other attempts to communicate. The receiver will now properly re-acknowledge `END` packets even when idle.
+- **Fixed (ESP32):** Fixed a bug where attempting to send an Image or Text immediately after Voice would allow the ESP32 to run multiple FreeRTOS transmission tasks simultaneously. This resulted in the UART stream being scrambled and crashed the ESP32. Strict mutual exclusion has been added to all upload handlers.
+- **Fixed (Android):** Fixed an issue where the Android App would fail to upload Images after sending Voice. This was caused by an internal bug in the ESP32 `WebServer`'s multipart parser failing to handle consecutive uploads over the same Keep-Alive TCP connection. The Android App now forces `Connection: close` on all file uploads to bypass this ESP32 bug.
+- **Fixed (Docs):** Rewrote the README with explicit instructions for sideloading the APK, clarifying peer roles, and added missing voltage warnings (3.3V vs 5V logic).
 ## [v4.0.0] - Motion Detection Security Camera
 - **Added:** "Enable Motion Detection" feature. The web app now performs offline Javascript pixel analysis every 1 second.
 - **Added:** Auto-trigger logic. If a >10% pixel change is detected, it automatically snaps a high-res photo, applies compression, and transmits it over LoRa.
