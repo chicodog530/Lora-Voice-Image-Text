@@ -366,6 +366,8 @@ void doReceive() {
                 rxReceived = 0;
                 
                 currentState = STATE_RX;
+                lastReceiveTime = millis();
+                delay(RADIO_TURNAROUND_DELAY);
                 sendFrame(Radio, ACK, rxImageId, 0xFFFF, nullptr, 0); // Acknowledge BEGIN
 
             } else if (currentState == STATE_RX && rxFrame.imageId == rxImageId) {
@@ -434,6 +436,7 @@ void doReceive() {
                 
                 currentVoiceState = V_RX;
                 lastVoiceReceiveTime = millis();
+                delay(RADIO_TURNAROUND_DELAY);
                 sendFrame(Radio, VOICE_ACK, rxVoiceId, 0xFFFF, nullptr, 0); // Acknowledge VOICE_BEGIN
 
             } else if (currentVoiceState == V_RX && rxFrame.imageId == rxVoiceId) {
