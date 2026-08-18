@@ -26,6 +26,7 @@ class Esp32Client(private val ipAddress: String = "192.168.4.1") {
     suspend fun getStatus(): Esp32Status? = withContext(Dispatchers.IO) {
         val request = Request.Builder()
             .url("http://$ipAddress/status")
+            .header("Connection", "close")
             .build()
         try {
             client.newCall(request).execute().use { response ->
@@ -74,6 +75,7 @@ class Esp32Client(private val ipAddress: String = "192.168.4.1") {
     suspend fun downloadVoice(): ByteArray? = withContext(Dispatchers.IO) {
         val request = Request.Builder()
             .url("http://$ipAddress/rx_voice.bin")
+            .header("Connection", "close")
             .build()
 
         try {
@@ -92,6 +94,7 @@ class Esp32Client(private val ipAddress: String = "192.168.4.1") {
 
         val request = Request.Builder()
             .url("http://$ipAddress/send_text")
+            .header("Connection", "close")
             .post(requestBody)
             .build()
 
@@ -133,6 +136,7 @@ class Esp32Client(private val ipAddress: String = "192.168.4.1") {
     suspend fun downloadImage(): ByteArray? = withContext(Dispatchers.IO) {
         val request = Request.Builder()
             .url("http://$ipAddress/rx_image.bin")
+            .header("Connection", "close")
             .build()
 
         try {
@@ -148,6 +152,7 @@ class Esp32Client(private val ipAddress: String = "192.168.4.1") {
         val requestBody = FormBody.Builder().build() // Empty POST
         val request = Request.Builder()
             .url("http://$ipAddress/request_image")
+            .header("Connection", "close")
             .post(requestBody)
             .build()
 
