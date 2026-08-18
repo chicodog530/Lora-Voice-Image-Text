@@ -404,6 +404,10 @@ void doReceive() {
                         currentState = STATE_IDLE; // Successfully received into sharedBuffer!
                     }
                 }
+            } else if (currentState == STATE_IDLE && rxFrame.type == END && rxFrame.imageId == completedRxImageId) {
+                // Transmitter missed our ACK and is retrying END. Send it again!
+                delay(RADIO_TURNAROUND_DELAY);
+                sendFrame(Radio, ACK, completedRxImageId, rxFrame.seq, nullptr, 0);
             }
             
             // ===========================================================================
@@ -471,6 +475,10 @@ void doReceive() {
                         currentVoiceState = V_IDLE; // Successfully received voice
                     }
                 }
+            } else if (currentVoiceState == V_IDLE && rxFrame.type == VOICE_END && rxFrame.imageId == completedRxVoiceId) {
+                // Transmitter missed our ACK and is retrying END. Send it again!
+                delay(RADIO_TURNAROUND_DELAY);
+                sendFrame(Radio, VOICE_ACK, completedRxVoiceId, rxFrame.seq, nullptr, 0);
             }
             
         }
@@ -481,6 +489,7 @@ void doReceive() {
 // WEB ENDPOINTS
 // ===========================================================================
 void handleRoot() {
+    server.sendHeader("Connection", "close");
     server.send(200, "text/html", WEB_APP_HTML);
 }
 
@@ -506,6 +515,7 @@ void handleStatus() {
     json += "\"rxText\":\"" + escapedText + "\",";
     json += "\"imageRequested\":" + String(remoteImageRequested ? "true" : "false");
     json += "}";
+    server.sendHeader("Connection", "close");
     server.send(200, "application/json", json);
 }
 
@@ -530,6 +540,7 @@ void handleUploadData() {
 }
 
 void handleUpload() {
+    server.sendHeader("Connection", "close");
     if (currentState != STATE_IDLE || currentVoiceState != V_IDLE) {
         server.send(400, "text/plain", "Busy");
         return;
@@ -573,6 +584,7 @@ void handleUploadVoiceData() {
 }
 
 void handleUploadVoice() {
+    server.sendHeader("Connection", "close");
     if (currentVoiceState != V_IDLE || currentState != STATE_IDLE) {
         server.send(400, "text/plain", "Voice Busy");
         return;
@@ -594,6 +606,7 @@ void handleUploadVoice() {
 }
 
 void handleRxImage() {
+    server.sendHeader("Connection", "close");
     if (rxLength == 0) {
         server.send(404, "text/plain", "No image");
         return;
@@ -604,6 +617,7 @@ void handleRxImage() {
 }
 
 void handleRxVoice() {
+    server.sendHeader("Connection", "close");
     if (rxVoiceLength == 0) {
         server.send(404, "text/plain", "No voice");
         return;
@@ -627,6 +641,7 @@ void handleRename() {
 }
 
 void handleSendText() {
+    server.sendHeader("Connection", "close");
     if (currentState != STATE_IDLE || currentVoiceState != V_IDLE) {
         server.send(400, "text/plain", "Busy");
         return;
@@ -653,6 +668,7 @@ void handleSendText() {
 }
 
 void handleRequestImage() {
+    server.sendHeader("Connection", "close");
     if (currentState != STATE_IDLE || currentVoiceState != V_IDLE) {
         server.send(400, "text/plain", "Busy");
         return;
