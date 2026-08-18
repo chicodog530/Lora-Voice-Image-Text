@@ -2,6 +2,7 @@ package com.example.loradigitalvoice.ui.image
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -11,9 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 @Composable
 fun ImageScreen(
@@ -23,6 +26,7 @@ fun ImageScreen(
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     var isSending by remember { mutableStateOf(false) }
     var uploadStatus by remember { mutableStateOf("") }
     var halfSize by remember { mutableStateOf(false) }
@@ -34,30 +38,26 @@ fun ImageScreen(
         } else null
     }
 
-    val takePictureLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { originalBitmap ->
-        if (originalBitmap != null) {
+    var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
             coroutineScope.launch {
-                isSending = true
-                uploadStatus = "Compressing..."
-                
-                val bitmapToProcess = if (halfSize) {
-                    Bitmap.createScaledBitmap(originalBitmap, originalBitmap.width / 2, originalBitmap.height / 2, true)
-                } else {
-                    originalBitmap
+                try {
+                    val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+                    if (inputStream != null) {
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        inputStream.close()
+                        selectedBitmap = bitmap
+                        uploadStatus = "Image selected. Press Send to upload."
+                    } else {
+                        uploadStatus = "Failed to open image."
+                    }
+                } catch (e: Exception) {
+                    uploadStatus = "Error: ${e.message}"
                 }
-                
-                // Compress bitmap to JPEG
-                val stream = ByteArrayOutputStream()
-                bitmapToProcess.compress(Bitmap.CompressFormat.JPEG, 70, stream)
-                val jpegBytes = stream.toByteArray()
-                
-                uploadStatus = "Uploading ${jpegBytes.size} bytes..."
-                val success = onUploadImage(jpegBytes, bitmapToProcess.width, bitmapToProcess.height)
-                
-                uploadStatus = if (success) "Upload Successful!" else "Upload Failed."
-                isSending = false
             }
         }
     }
@@ -102,11 +102,11 @@ fun ImageScreen(
         
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(
-                onClick = { takePictureLauncher.launch(null) },
+                onClick = { pickImageLauncher.launch("image/*") },
                 enabled = !isSending,
                 modifier = Modifier.weight(1f).height(60.dp)
             ) {
-                Text("Send Photo")
+                Text("Select Image")
             }
             
             Button(
@@ -124,6 +124,68 @@ fun ImageScreen(
                 modifier = Modifier.weight(1f).height(60.dp)
             ) {
                 Text("Request Remote")
+            }
+        }
+
+        if (selectedBitmap != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Selected Image Preview:", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Image(
+                bitmap = selectedBitmap!!.asImageBitmap(),
+                contentDescription = "Selected Image",
+                modifier = Modifier.size(150.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        isSending = true
+                        uploadStatus = "Compressing..."
+                        
+                        val original = selectedBitmap!!
+                        val targetWidth = if (halfSize) 400 else 800
+                        val targetHeight = if (halfSize) 300 else 600
+
+                        // Calculate aspect ratio preserving dimensions
+                        val aspectRatio = original.width.toFloat() / original.height.toFloat()
+                        var finalWidth = targetWidth
+                        var finalHeight = (targetWidth / aspectRatio).toInt()
+                        
+                        if (finalHeight > targetHeight) {
+                            finalHeight = targetHeight
+                            finalWidth = (targetHeight * aspectRatio).toInt()
+                        }
+
+                        val bitmapToProcess = Bitmap.createScaledBitmap(original, finalWidth, finalHeight, true)
+                        
+                        // Compress bitmap to JPEG
+                        val stream = ByteArrayOutputStream()
+                        bitmapToProcess.compress(Bitmap.CompressFormat.JPEG, 70, stream)
+                        val jpegBytes = stream.toByteArray()
+                        
+                        uploadStatus = "Uploading ${jpegBytes.size} bytes..."
+                        val success = onUploadImage(jpegBytes, finalWidth, finalHeight)
+                        
+                        if (success) {
+                            uploadStatus = "Upload Successful!"
+                            selectedBitmap = null // Clear preview
+                        } else {
+                            uploadStatus = "Upload Failed."
+                        }
+                        isSending = false
+                    }
+                },
+                enabled = !isSending,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
+                modifier = Modifier.fillMaxWidth().height(60.dp)
+            ) {
+                Text("SEND TO ESP32")
             }
         }
         
