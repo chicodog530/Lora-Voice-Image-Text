@@ -51,7 +51,8 @@ Both ESP32 devices run the exact same firmware.
 
 ### Part 2: Installing the Android App (Main Phone)
 This phone will be your primary handheld device for sending texts, voice messages, and requesting images.
-1. Sideload the provided `LoRa_Digital_Voice_App.apk` file onto your Android Phone, OR open the `LoRa_Digital_Voice_App` folder in Android Studio and hit **Play** to install it via USB.
+1. If you downloaded the pre-compiled `LoRa_Digital_Voice_App.apk` from the GitHub release or the repository, simply transfer it to your Android Phone and tap it to install (sideload).
+   - *(Optional: If you prefer to compile from source, open the `LoRa_Digital_Voice_App` folder in Android Studio and hit **Play** to install it via USB).*
 2. Once installed, go to your phone's Wi-Fi settings and connect to the ESP32 network (e.g., `LoRa_Chat_1A2B`).
    - *Note: Android may warn you that the network has "No Internet Access". Tap **"Keep Connection"**.*
 3. Open the **LoRa Voice** app. You should be able to navigate between the Voice, Text, and Image tabs!
@@ -61,7 +62,11 @@ Instead of the app, this phone will use the built-in Web App served directly by 
 1. Go to your **Remote Phone's** Wi-Fi settings and connect to the second ESP32 network (e.g., `LoRa_Chat_9F8E`).
 2. Open Google Chrome (or your preferred mobile browser).
 3. Type `http://192.168.4.1` into the address bar and hit Go.
-4. **To Arm the Security Camera:**
+4. **Important Chrome Security Setting:** Because the ESP32 serves the site over HTTP instead of HTTPS, Chrome blocks access to the camera by default. To fix this:
+   - In Chrome, open a new tab and go to `chrome://flags`
+   - Search for **"Insecure origins treated as secure"**
+   - Type `http://192.168.4.1` into the text box, change the dropdown to **Enabled**, and tap the **Relaunch** button at the bottom of the screen.
+5. **To Arm the Security Camera:**
    - Scroll down and check the **"Remote Cam"** box. Your browser will ask for Camera Permissions. Tap **Allow**.
    - Check the **"Motion Detect"** box if you want the phone to automatically snap and send photos when it sees movement.
    - **Leave the phone plugged in, with the screen ON, resting on this webpage.** 
