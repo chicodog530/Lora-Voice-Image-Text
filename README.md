@@ -28,7 +28,7 @@ The UART LoRa modules connect easily to the ESP32.
 
 | LoRa Module | ESP32 Pin | Notes |
 | :--- | :--- | :--- |
-| **VCC** | **5V / VIN** | Module requires 5V power. |
+| **VCC** | **3.3V or 5V** | **CRITICAL:** Check your specific LoRa module's voltage requirements! Supplying 5V to a 3.3V module will destroy it. |
 | **GND** | **GND** | Common ground. |
 | **TX** | **Pin 16** | ESP32 RX receives from LoRa TX. |
 | **RX** | **Pin 17** | ESP32 TX transmits to LoRa RX. |
