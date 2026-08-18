@@ -18,8 +18,9 @@ An off-grid, two-way communicator and remote security camera system built with E
 To build a complete two-way system, you need two of everything:
 1. **2x ESP32 Development Boards** (Standard ESP32, NodeMCU ESP32, ESP32-WROOM, etc.)
 2. **2x UART LoRa Modules**: e.g., Loongtrek SX1262 DX-LR32, Ebyte E220, or Reyax RYLR998.
-3. **2x Antennas** (Usually included with the LoRa modules)
-4. Jumper wires and USB power banks.
+3. **2x Android Phones**: One primary phone for the Android App, and one spare phone to act as the unattended Security Camera.
+4. **2x Antennas** (Usually included with the LoRa modules)
+5. Jumper wires and USB power banks.
 
 ---
 
