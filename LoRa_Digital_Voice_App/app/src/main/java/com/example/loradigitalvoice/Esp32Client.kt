@@ -58,6 +58,7 @@ class Esp32Client(private val ipAddress: String = "192.168.4.1") {
 
         val request = Request.Builder()
             .url("http://$ipAddress/upload_voice")
+            .header("Connection", "close")
             .post(requestBody)
             .build()
 
@@ -116,6 +117,7 @@ class Esp32Client(private val ipAddress: String = "192.168.4.1") {
             .url("http://$ipAddress/upload")
             .header("X-Width", width.toString())
             .header("X-Height", height.toString())
+            .header("Connection", "close")
             .post(requestBody)
             .build()
 
