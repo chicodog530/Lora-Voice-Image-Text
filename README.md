@@ -50,8 +50,9 @@ Both ESP32 devices run the exact same firmware.
 
 > **Wi-Fi Credentials:** Each ESP32 will broadcast its own Wi-Fi network named `LoRa_Chat_XXXX` (where XXXX is the last 4 characters of its MAC address). The password for the Wi-Fi network is `12345678`.
 
-### Part 2: Installing the Android App
+### Part 2: Installing the Android App (For Voice, Text & Images)
 Both nodes in this system are identical peers. You can install the Android App on both phones to use them as two-way Walkie-Talkies, or you can set one up as an unattended Security Camera.
+*(Note: If you only care about sending Images and Text and don't need Voice, you can skip the Android App entirely! Just connect to the ESP32 Wi-Fi and open `http://192.168.4.1` in your browser on both phones to use the built-in Web App).*
 
 1. If you downloaded the pre-compiled `LoRa_Digital_Voice_App.apk` from the GitHub release or the repository, simply transfer it to your Android Phone and tap it to install (sideload).
    - *(Optional: If you prefer to compile from source, open the `LoRa_Digital_Voice_App` folder in Android Studio and hit **Play** to install it via USB).*
@@ -60,7 +61,7 @@ Both nodes in this system are identical peers. You can install the Android App o
 3. Open the **LoRa Voice** app. You should be able to navigate between the Voice, Text, and Image tabs!
 
 ### Part 3: Setting Up the Security Camera (Optional)
-If you want to use one of the phones as an unattended motion-detecting security camera, it must use the built-in Web App served directly by the ESP32 instead of the Android App. This allows it to run automatic motion detection and camera capture in the background!
+If you want to use one of the phones as an unattended motion-detecting security camera, it must use the built-in Web App served directly by the ESP32. This allows it to run automatic motion detection and camera capture in the background!
 1. Go to your **Camera Phone's** Wi-Fi settings and connect to its ESP32 network (e.g., `LoRa_Chat_9F8E`).
 2. Open Google Chrome (or your preferred mobile browser).
 3. Type `http://192.168.4.1` into the address bar and hit Go.
