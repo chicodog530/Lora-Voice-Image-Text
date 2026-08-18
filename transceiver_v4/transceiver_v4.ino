@@ -512,25 +512,25 @@ void handleStatus() {
 void handleUploadData() {
     HTTPUpload& upload = server.upload();
     if (upload.status == UPLOAD_FILE_START) {
-        if (currentState != STATE_IDLE) return;
+        if (currentState != STATE_IDLE || currentVoiceState != V_IDLE) return;
         txLength = 0;
         rxLength = 0;
         completedRxImageId = 0; // Clear the incoming photo since we are overwriting the shared buffer
         remoteImageRequested = false; // Reset request flag since we are fulfilling it
     } else if (upload.status == UPLOAD_FILE_WRITE) {
-        if (currentState != STATE_IDLE) return;
+        if (currentState != STATE_IDLE || currentVoiceState != V_IDLE) return;
         if (txLength + upload.currentSize > sizeof(sharedBuffer)) return;
         memcpy(&sharedBuffer[txLength], upload.buf, upload.currentSize);
         txLength += upload.currentSize;
     } else if (upload.status == UPLOAD_FILE_END) {
-        if (currentState != STATE_IDLE) return;
+        if (currentState != STATE_IDLE || currentVoiceState != V_IDLE) return;
         txCrc = crc32(sharedBuffer, txLength);
         txImageId = millis();
     }
 }
 
 void handleUpload() {
-    if (currentState != STATE_IDLE) {
+    if (currentState != STATE_IDLE || currentVoiceState != V_IDLE) {
         server.send(400, "text/plain", "Busy");
         return;
     }
@@ -556,24 +556,24 @@ void handleUpload() {
 void handleUploadVoiceData() {
     HTTPUpload& upload = server.upload();
     if (upload.status == UPLOAD_FILE_START) {
-        if (currentVoiceState != V_IDLE) return;
+        if (currentVoiceState != V_IDLE || currentState != STATE_IDLE) return;
         txVoiceLength = 0;
         rxVoiceLength = 0;
         completedRxVoiceId = 0;
     } else if (upload.status == UPLOAD_FILE_WRITE) {
-        if (currentVoiceState != V_IDLE) return;
+        if (currentVoiceState != V_IDLE || currentState != STATE_IDLE) return;
         if (txVoiceLength + upload.currentSize > sizeof(voiceBuffer)) return;
         memcpy(&voiceBuffer[txVoiceLength], upload.buf, upload.currentSize);
         txVoiceLength += upload.currentSize;
     } else if (upload.status == UPLOAD_FILE_END) {
-        if (currentVoiceState != V_IDLE) return;
+        if (currentVoiceState != V_IDLE || currentState != STATE_IDLE) return;
         txVoiceCrc = crc32(voiceBuffer, txVoiceLength);
         txVoiceId = millis();
     }
 }
 
 void handleUploadVoice() {
-    if (currentVoiceState != V_IDLE) {
+    if (currentVoiceState != V_IDLE || currentState != STATE_IDLE) {
         server.send(400, "text/plain", "Voice Busy");
         return;
     }
@@ -627,7 +627,7 @@ void handleRename() {
 }
 
 void handleSendText() {
-    if (currentState != STATE_IDLE) {
+    if (currentState != STATE_IDLE || currentVoiceState != V_IDLE) {
         server.send(400, "text/plain", "Busy");
         return;
     }
@@ -653,7 +653,7 @@ void handleSendText() {
 }
 
 void handleRequestImage() {
-    if (currentState != STATE_IDLE) {
+    if (currentState != STATE_IDLE || currentVoiceState != V_IDLE) {
         server.send(400, "text/plain", "Busy");
         return;
     }
