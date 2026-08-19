@@ -19,6 +19,10 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import android.content.ContentValues
+import android.provider.MediaStore
+import android.widget.Toast
+import java.io.OutputStream
 
 @Composable
 fun ImageScreen(
@@ -100,6 +104,32 @@ fun ImageScreen(
                 contentDescription = "Received Image",
                 modifier = Modifier.size(250.dp)
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        try {
+                            val values = ContentValues().apply {
+                                put(MediaStore.Images.Media.DISPLAY_NAME, "lora_image_${System.currentTimeMillis()}.jpg")
+                                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/LoRaImages")
+                            }
+                            val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                            if (uri != null) {
+                                val out: OutputStream? = context.contentResolver.openOutputStream(uri)
+                                out?.use { rxBitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
+                                Toast.makeText(context, "Saved to Gallery!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Failed to create file", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error saving: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            ) {
+                Text("Save to Gallery")
+            }
         } else {
             Box(
                 modifier = Modifier.size(250.dp),
