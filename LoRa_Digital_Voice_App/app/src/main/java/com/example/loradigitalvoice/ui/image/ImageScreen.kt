@@ -180,19 +180,6 @@ fun ImageScreen(
 
         if (selectedBitmap != null) {
             Spacer(modifier = Modifier.height(16.dp))
-            Divider()
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Selected Image Preview:", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Image(
-                bitmap = selectedBitmap!!.asImageBitmap(),
-                contentDescription = "Selected Image",
-                modifier = Modifier.size(150.dp)
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
             Button(
                 onClick = {
                     coroutineScope.launch {
@@ -248,6 +235,18 @@ fun ImageScreen(
             ) {
                 Text("SEND TO ESP32")
             }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Selected Image Preview:", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Image(
+                bitmap = selectedBitmap!!.asImageBitmap(),
+                contentDescription = "Selected Image",
+                modifier = Modifier.size(150.dp)
+            )
         }
         
         if (uploadStatus.isNotEmpty()) {
