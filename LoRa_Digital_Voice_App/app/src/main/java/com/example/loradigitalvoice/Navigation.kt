@@ -25,10 +25,12 @@ fun MainNavigation() {
     var lastRxVoiceId by remember { mutableLongStateOf(0L) }
     var lastRxTextId by remember { mutableLongStateOf(0L) }
     var lastImageRequested by remember { mutableStateOf(false) }
+    var esp32Status by remember { mutableStateOf<Esp32Status?>(null) }
 
     LaunchedEffect(Unit) {
         while(true) {
             val status = esp32Client.getStatus()
+            esp32Status = status
             if (status != null) {
                 if (status.rxTextId != lastRxTextId && status.rxTextId != 0L) {
                     rxText = status.rxText
@@ -91,6 +93,7 @@ fun MainNavigation() {
                 rxImageData = rxImageData, 
                 onUploadImage = { data, w, h -> esp32Client.uploadImage(data, w, h) }, 
                 onRequestImage = { esp32Client.requestRemoteImage() },
+                esp32Status = esp32Status,
                 modifier = modifier
             )
         }

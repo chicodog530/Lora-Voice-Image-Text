@@ -25,6 +25,7 @@ fun ImageScreen(
     rxImageData: ByteArray?,
     onUploadImage: suspend (ByteArray, Int, Int) -> Boolean,
     onRequestImage: suspend () -> Boolean,
+    esp32Status: com.example.loradigitalvoice.Esp32Status?,
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -72,6 +73,21 @@ fun ImageScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "LoRa Security Cam & Images", style = MaterialTheme.typography.headlineSmall)
+        
+        if (esp32Status != null && (esp32Status.mode == "tx" || esp32Status.mode == "rx") && esp32Status.total > 0) {
+            Spacer(modifier = Modifier.height(16.dp))
+            val progress = esp32Status.sent.toFloat() / esp32Status.total.toFloat()
+            val modeText = if (esp32Status.mode == "tx") "Transmitting over LoRa..." else "Receiving over LoRa..."
+            
+            Text(text = modeText, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.height(8.dp))
+            LinearProgressIndicator(
+                progress = progress,
+                modifier = Modifier.fillMaxWidth().height(12.dp)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "${esp32Status.sent} / ${esp32Status.total} bytes", style = MaterialTheme.typography.bodyMedium)
+        }
         
         Spacer(modifier = Modifier.height(16.dp))
         

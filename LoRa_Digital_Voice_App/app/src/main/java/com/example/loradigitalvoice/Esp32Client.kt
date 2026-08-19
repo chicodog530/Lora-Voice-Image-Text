@@ -16,7 +16,9 @@ data class Esp32Status(
     val rxVoiceId: Long,
     val rxTextId: Long,
     val rxText: String,
-    val imageRequested: Boolean
+    val imageRequested: Boolean,
+    val sent: Long,
+    val total: Long
 )
 
 class Esp32Client(private val ipAddress: String = "192.168.4.1") {
@@ -39,7 +41,9 @@ class Esp32Client(private val ipAddress: String = "192.168.4.1") {
                         rxVoiceId = json.optLong("rxVoiceId", 0),
                         rxTextId = json.optLong("rxTextId", 0),
                         rxText = json.optString("rxText", ""),
-                        imageRequested = json.optBoolean("imageRequested", false)
+                        imageRequested = json.optBoolean("imageRequested", false),
+                        sent = json.optLong("sent", 0),
+                        total = json.optLong("total", 0)
                     )
                 } else null
             }
