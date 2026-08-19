@@ -186,6 +186,10 @@ void sendTask(void*) {
         memcpy(packetBuffer, &sharedBuffer[txSent], bytesToRead);
         sendFrame(Radio, DATA, txImageId, sequenceNumber, packetBuffer, bytesToRead);
 
+        if (sequenceNumber % 10 == 0) {
+            Serial.printf("TX: Sent %d / %d bytes\n", txSent + bytesToRead, txLength);
+        }
+
         txSent += bytesToRead;
         sequenceNumber++;
         delay(450); // Pacing increased to prevent LoRa module buffer overflow!
@@ -220,6 +224,12 @@ void sendTask(void*) {
                 }
             }
         }
+    }
+    
+    if (transferComplete) {
+        Serial.println("Image TX Complete!");
+    } else {
+        Serial.println("Image TX failed after 10 END retries.");
     }
 
     currentState = STATE_IDLE;
@@ -374,6 +384,7 @@ void doReceive() {
                 
                 currentState = STATE_RX;
                 lastReceiveTime = millis();
+                Serial.printf("Received Image BEGIN. Expecting %d bytes.\n", rxLength);
                 delay(RADIO_TURNAROUND_DELAY);
                 sendFrame(Radio, ACK, rxImageId, 0xFFFF, nullptr, 0); // Acknowledge BEGIN
 
@@ -388,6 +399,10 @@ void doReceive() {
                             rxMask[byteIdx] |= bitMask;
                             rxReceived += rxFrame.len;
                             memcpy(&sharedBuffer[seq * MAX_PAYLOAD], rxFrame.data, rxFrame.len);
+                            
+                            if (seq % 10 == 0) {
+                                Serial.printf("RX: Received %d / %d bytes\n", rxReceived, rxLength);
+                            }
                         }
                     }
                 } else if (rxFrame.type == END) {
@@ -406,8 +421,10 @@ void doReceive() {
                     delay(RADIO_TURNAROUND_DELAY);
 
                     if (missingCount > 0) {
+                        Serial.printf("Received END. Missing %d packets. Requesting resend...\n", missingCount);
                         sendFrame(Radio, MISSING, rxImageId, rxFrame.seq, missingPayload, missingCount * 2);
                     } else {
+                        Serial.println("Image transfer complete! All packets received.");
                         sendFrame(Radio, ACK, rxImageId, rxFrame.seq, nullptr, 0);
                         completedRxImageId = rxImageId;
                         currentState = STATE_IDLE; // Successfully received into sharedBuffer!
