@@ -57,7 +57,7 @@ fun MainNavigation() {
                 }
                 lastImageRequested = status.imageRequested
             }
-            delay(2000)
+            delay(500) // Polling 4x faster to dramatically reduce receiving latency
         }
     }
 
