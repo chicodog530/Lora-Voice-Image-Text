@@ -169,10 +169,20 @@ fun ImageScreen(
 
                         val bitmapToProcess = Bitmap.createScaledBitmap(original, finalWidth, finalHeight, true)
                         
-                        // Compress bitmap to JPEG
-                        val stream = ByteArrayOutputStream()
-                        bitmapToProcess.compress(Bitmap.CompressFormat.JPEG, 70, stream)
-                        val jpegBytes = stream.toByteArray()
+                        var quality = 80
+                        var jpegBytes: ByteArray
+                        do {
+                            val stream = ByteArrayOutputStream()
+                            bitmapToProcess.compress(Bitmap.CompressFormat.JPEG, quality, stream)
+                            jpegBytes = stream.toByteArray()
+                            quality -= 15
+                        } while (jpegBytes.size > 45000 && quality > 10)
+                        
+                        if (jpegBytes.size > 45000) {
+                            uploadStatus = "Error: Image too complex (${jpegBytes.size} bytes). Try Half Size."
+                            isSending = false
+                            return@launch
+                        }
                         
                         uploadStatus = "Uploading ${jpegBytes.size} bytes..."
                         val success = onUploadImage(jpegBytes, finalWidth, finalHeight)
