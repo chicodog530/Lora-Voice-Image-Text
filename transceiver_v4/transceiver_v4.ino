@@ -192,7 +192,7 @@ void sendTask(void*) {
 
         txSent += bytesToRead;
         sequenceNumber++;
-        delay(450); // Pacing increased to prevent LoRa module buffer overflow!
+        delay(130); // Pacing reduced to match Voice Task!
     }
 
     // 3. Send END packet and handle MISSING packets
