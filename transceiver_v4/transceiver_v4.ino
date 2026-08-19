@@ -153,19 +153,26 @@ bool reliableSend(uint32_t imageId, uint8_t packetType, uint16_t sequenceNumber,
 // TX: BACKGROUND SEND TASK
 // ===========================================================================
 void sendTask(void*) {
+    Serial.printf("Starting Image TX. Size: %d bytes\n", txLength);
     // 1. Send BEGIN packet
     uint8_t metadata[18];
+    memset(metadata, 0, 18);
     put16(metadata, txW);
     put16(metadata + 2, txH);
     metadata[4] = txFmt;
     metadata[5] = txComp;
     put32(metadata + 6, txLength);
     put32(metadata + 10, txCrc);
-    if (!reliableSend(txImageId, BEGIN, 0xFFFF, metadata, sizeof(metadata))) {
+    put32(metadata + 14, txImageId);
+    
+    if (!reliableSend(txImageId, BEGIN, 0xFFFF, metadata, sizeof(metadata), ACK)) {
+        Serial.println("Failed to get ACK for BEGIN. Aborting TX.");
         currentState = STATE_IDLE;
         vTaskDelete(nullptr);
         return;
     }
+
+    Serial.println("BEGIN ACK'd. Blasting DATA...");
 
     // 2. Blast all DATA packets continuously
     uint8_t packetBuffer[MAX_PAYLOAD];
